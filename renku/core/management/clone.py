@@ -50,6 +50,7 @@ def clone(
     config=None,
     raise_git_except=False,
     checkout_rev=None,
+    **kwargs,
 ):
     """Clone Renku project repo, install Git hooks and LFS."""
     from renku.core.management.client import LocalClient
@@ -65,7 +66,9 @@ def clone(
 
     try:
         # NOTE: Try to clone, assuming checkout_rev is a branch (if it is set)
-        repo = Repo.clone_from(url, path, branch=checkout_rev, recursive=recursive, depth=depth, progress=progress)
+        repo = Repo.clone_from(
+            url, path, branch=checkout_rev, recursive=recursive, depth=depth, progress=progress, **kwargs
+        )
     except GitCommandError as e:
         # NOTE: clone without branch set, in case checkout_rev was not a branch but a tag or commit
         if not checkout_rev:
