@@ -66,7 +66,7 @@ def test_renku_clone_with_config(tmp_path, url):
         repo, _ = (
             project_clone_command()
             .build()
-            .execute(url, git_config={"user.name": "sam", "user.email": "s@m.i", "filter.lfs.custom": "0"})
+            .execute(url, config={"user.name": "sam", "user.email": "s@m.i", "filter.lfs.custom": "0"})
         ).output
 
         assert "master" == repo.active_branch.name
@@ -88,7 +88,7 @@ def test_renku_clone_checkout_rev(tmp_path, url):
             .build()
             .execute(
                 url,
-                git_config={"user.name": "sam", "user.email": "s@m.i", "filter.lfs.custom": "0"},
+                config={"user.name": "sam", "user.email": "s@m.i", "filter.lfs.custom": "0"},
                 checkout_rev="97f907e1a3f992d4acdc97a35df73b8affc917a6",
             )
         ).output

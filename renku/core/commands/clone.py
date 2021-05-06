@@ -30,7 +30,7 @@ def _project_clone(
     recursive=True,
     depth=None,
     progress=None,
-    git_config=None,
+    config=None,
     raise_git_except=False,
     checkout_rev=None,
 ):
@@ -46,7 +46,7 @@ def _project_clone(
         recursive=recursive,
         depth=depth,
         progress=progress,
-        git_config=git_config,
+        config=config,
         raise_git_except=raise_git_except,
         checkout_rev=checkout_rev,
     )

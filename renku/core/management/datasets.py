@@ -1374,10 +1374,7 @@ class DatasetsApiMixin(object):
             except PermissionError:
                 raise errors.InvalidFileOperation(f"Cannot delete files in {repo_path}: Permission denied")
 
-        print("XXX REPO URL", git_url)
-        print("XXX ---- ", config)
-
-        repo, _ = clone(git_url, path=str(repo_path), install_githooks=False, depth=depth, cmd_config=config)
+        repo, _ = clone(git_url, path=str(repo_path), install_githooks=False, depth=depth, config=config)
 
         # Because the name of the default branch is not always 'master', we
         # create an alias of the default branch when cloning the repo. It

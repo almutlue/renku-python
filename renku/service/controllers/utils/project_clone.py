@@ -40,7 +40,7 @@ def user_project_clone(cache, user_data, project_data):
                 project.abs_path,
                 depth=project_data["depth"],
                 raise_git_except=True,
-                git_config={"user.name": project_data["fullname"], "user.email": project_data["email"]},
+                config={"user.name": project_data["fullname"], "user.email": project_data["email"]},
                 checkout_rev=project_data["ref"],
             )
         ).output
