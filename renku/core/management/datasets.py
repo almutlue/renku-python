@@ -1325,7 +1325,7 @@ class DatasetsApiMixin(object):
         else:
             return True
 
-    def prepare_git_repo(self, url, ref=None, gitlab_token=None, renku_token=None):
+    def prepare_git_repo(self, url, ref=None, gitlab_token=None, renku_token=None, deployment_hostname=None):
         """Clone and cache a Git repo."""
         if not url:
             raise errors.GitError("Invalid URL.")
@@ -1343,15 +1343,13 @@ class DatasetsApiMixin(object):
         elif "http" in u.protocol and gitlab_token:
             git_url = get_oauth_url(url, gitlab_token)
         elif "http" in u.protocol and renku_token:
-            config = f"http.extraheader='Authorization: Bearer {renku_token}'"
-            git_url = get_renku_repo_url(url)
+            config = f"http.extraheader=Authorization: Bearer {renku_token}"
+            git_url = get_renku_repo_url(url, deployment_hostname=deployment_hostname)
         else:
             git_url = url
 
         path = os.path.dirname(path).lstrip("/")
         repo_path = self.renku_path / self.CACHE / u.hostname / path / u.name
-
-        print("XXX REPO URL", git_url)
 
         if repo_path.exists():
             repo = Repo(str(repo_path))
@@ -1386,8 +1384,6 @@ class DatasetsApiMixin(object):
             repo.git.execute(["git", "symbolic-ref", renku_ref, repo.head.reference.path])
         except GitCommandError as e:
             raise errors.GitError(f"Cannot clone remote Git repo: {url}") from e
-
-        print("XXX ---- ", git_url, depth, config)
 
         try:
             repo.git.checkout(ref)

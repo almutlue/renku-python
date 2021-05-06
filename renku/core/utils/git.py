@@ -93,14 +93,14 @@ def have_same_remote(url1, url2):
     return u1.hostname == u2.hostname and u1.pathname == u2.pathname
 
 
-def get_renku_repo_url(remote_url, hostname=None):
-    """Return a repo url that is authenticated by renku."""
+def get_renku_repo_url(remote_url, deployment_hostname=None):
+    """Return a repo url that can be authenticated by renku."""
     parsed_remote = GitURL.parse(remote_url)
     path = parsed_remote.pathname.strip("/")
     if path.startswith("gitlab/"):
         path = path.replace("gitlab/", "")
     path = pathlib.posixpath.join(CLI_GITLAB_ENDPOINT, path)
 
-    hostname = hostname or parsed_remote.hostname
+    hostname = deployment_hostname or parsed_remote.hostname
 
     return urllib.parse.urljoin(f"https://{hostname}", path)

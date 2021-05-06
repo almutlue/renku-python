@@ -111,7 +111,7 @@ def _store_git_token(client, access_token):
 
 
 def _swap_git_remote(client, parsed_endpoint, remote_name, remote_url):
-    new_remote_url = get_renku_repo_url(remote_url, hostname=parsed_endpoint.netloc)
+    new_remote_url = get_renku_repo_url(remote_url, deployment_hostname=parsed_endpoint.netloc)
 
     backup_remote_name = f"{RENKU_BACKUP_PREFIX}-{remote_name}"
     try:

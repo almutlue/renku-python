@@ -270,7 +270,7 @@ class _RenkuRecordSerializer:
 
     def as_dataset(self, client):
         """Return encapsulated dataset instance."""
-        self._fetch_dataset(client, gitlab_token=self._gitlab_token)
+        self._fetch_dataset(client)
         return self._dataset
 
     def import_images(self, client, dataset):
@@ -325,15 +325,22 @@ class _RenkuRecordSerializer:
         """Whether the dataset datadir exists (might be missing in git if empty)."""
         return (self._remote_client.path / self._dataset.data_dir).exists()
 
-    def _fetch_dataset(self, client, gitlab_token):
+    def _fetch_dataset(self, client):
         repo_path = None
+
+        parsed_uri = urllib.parse.urlparse(self._uri)
 
         urls = (self._project_url_ssh, self._project_url_http)
         urls = [self._project_url_http]  # XXX Remove this
         # Clone the project
         for url in urls:
             try:
-                repo, repo_path = client.prepare_git_repo(url, gitlab_token=gitlab_token, renku_token=self._renku_token)
+                repo, repo_path = client.prepare_git_repo(
+                    url=url,
+                    gitlab_token=self._gitlab_token,
+                    renku_token=self._renku_token,
+                    deployment_hostname=parsed_uri.netloc,
+                )
             except errors.GitError:
                 pass
             else:
