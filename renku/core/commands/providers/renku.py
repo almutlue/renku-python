@@ -327,11 +327,11 @@ class _RenkuRecordSerializer:
 
     def _fetch_dataset(self, client):
         repo_path = None
+        repo = None
 
         parsed_uri = urllib.parse.urlparse(self._uri)
 
         urls = (self._project_url_ssh, self._project_url_http)
-        urls = [self._project_url_http]  # XXX Remove this
         # Clone the project
         for url in urls:
             try:
