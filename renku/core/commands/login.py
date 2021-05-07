@@ -106,7 +106,8 @@ def _store_token(client, parsed_endpoint, access_token):
 
 
 def _store_git_token(client, access_token):
-    header = f"Authorization: Bearer {access_token}"
+    # NOTE: Do not use "Authorization: Bearer token" because it interferes with Git LFS authentication
+    header = f"Renku-Auth-Access-Token: {access_token}"
     client.repo.git.config("http.extraheader", header, local=True)
 
 

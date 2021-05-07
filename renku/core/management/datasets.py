@@ -1343,7 +1343,8 @@ class DatasetsApiMixin(object):
         elif "http" in u.protocol and gitlab_token:
             git_url = get_oauth_url(url, gitlab_token)
         elif "http" in u.protocol and renku_token:
-            config = f"http.extraheader=Authorization: Bearer {renku_token}"
+            # NOTE: Do not use "Authorization: Bearer token" because it interferes with Git LFS authentication
+            config = f"http.extraheader=Renku-Auth-Access-Token: {renku_token}"
             git_url = get_renku_repo_url(url, deployment_hostname=deployment_hostname)
         else:
             git_url = url

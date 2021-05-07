@@ -33,7 +33,8 @@ def test_login(runner, client_with_remote, mock_login):
 
     assert 0 == result.exit_code
     assert ACCESS_TOKEN == read_renku_token(client_with_remote, ENDPOINT)
-    assert "Authorization: Bearer jwt-token" == client_with_remote.repo.config_reader().get_value("http", "extraheader")
+    extraheader = client_with_remote.repo.config_reader().get_value("http", "extraheader")
+    assert f"Renku-Auth-Access-Token: {ACCESS_TOKEN}" == extraheader
     assert {"origin", "renku-backup-origin"} == {r.name for r in client_with_remote.repo.remotes}
     assert remote_url == client_with_remote.repo.remotes["renku-backup-origin"].url
     assert client_with_remote.repo.remotes["origin"].url.startswith(f"https://{ENDPOINT}/repo")
