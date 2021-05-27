@@ -26,7 +26,7 @@ from renku.core import errors
 from renku.core.models.git import GitURL
 
 ARGUMENT_BATCH_SIZE = 100
-CLI_GITLAB_ENDPOINT = "repo"
+CLI_GITLAB_ENDPOINT = "repos"
 
 
 def run_command(command, *paths, separator=None, **kwargs):

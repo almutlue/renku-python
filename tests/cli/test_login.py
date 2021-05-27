@@ -17,6 +17,7 @@
 # limitations under the License.
 """Test ``login`` command."""
 
+import git
 import pytest
 
 from renku.cli import cli
@@ -33,8 +34,8 @@ def test_login(runner, client_with_remote, mock_login):
 
     assert 0 == result.exit_code
     assert ACCESS_TOKEN == read_renku_token(client_with_remote, ENDPOINT)
-    extraheader = client_with_remote.repo.config_reader().get_value("http", "extraheader")
-    assert f"Renku-Auth-Access-Token: {ACCESS_TOKEN}" == extraheader
+    credential = client_with_remote.repo.config_reader().get_value("credential", "helper")
+    assert f"!renku token --hostname {ENDPOINT}" == credential
     assert {"origin", "renku-backup-origin"} == {r.name for r in client_with_remote.repo.remotes}
     assert remote_url == client_with_remote.repo.remotes["renku-backup-origin"].url
     assert client_with_remote.repo.remotes["origin"].url.startswith(f"https://{ENDPOINT}/repo")
@@ -201,7 +202,7 @@ def test_repeated_git_login(runner, client_with_remote, mock_login):
     result = runner.invoke(cli, ["login", "--git", "--yes", ENDPOINT], input=USER_CODE)
 
     assert 0 == result.exit_code
-    assert "Error: Cannot create backup remote 'renku-backup-origin' for" in result.output
+    assert "Error: Cannot create backup remote 'renku-backup-origin' for" not in result.output
     assert {"origin", "renku-backup-origin"} == {r.name for r in client_with_remote.repo.remotes}
     assert remote_url == client_with_remote.repo.remotes["renku-backup-origin"].url
     assert client_with_remote.repo.remotes["origin"].url.startswith(f"https://{ENDPOINT}/repo")
@@ -219,3 +220,51 @@ def test_logout_git(runner, client_with_remote, mock_login):
     assert 0 == result.exit_code
     assert {"origin"} == {r.name for r in client_with_remote.repo.remotes}
     assert remote_url == client_with_remote.repo.remotes["origin"].url
+    try:
+        credential = client_with_remote.repo.git.config("credential.helper", local=True)
+    except git.exc.GitCommandError:  # NOTE: If already logged out, ``git config --unset`` raises an exception
+        credential = None
+    assert credential is None
+
+
+def test_token(runner, client_with_remote, mock_login):
+    """Test get credential when valid credential exist."""
+    assert 0 == runner.invoke(cli, ["login", ENDPOINT], input=USER_CODE).exit_code
+
+    result = runner.invoke(cli, ["token", "--hostname", ENDPOINT, "get"])
+
+    assert 0 == result.exit_code
+    assert "username=renku\n" in result.output
+    assert f"password={ACCESS_TOKEN}\n" in result.output
+
+
+def test_token_non_existing_hostname(runner, client_with_remote, mock_login):
+    """Test get credential for a different hostname."""
+    assert 0 == runner.invoke(cli, ["login", ENDPOINT], input=USER_CODE).exit_code
+
+    result = runner.invoke(cli, ["token", "--hostname", "non-existing", "get"])
+
+    assert 0 == result.exit_code
+    assert "username=renku\n" in result.output
+    assert "password=\n" in result.output
+
+
+def test_token_no_credential(runner, client_with_remote, mock_login):
+    """Test get credential when valid credential doesn't exist."""
+    assert 0 == runner.invoke(cli, ["logout"]).exit_code
+
+    result = runner.invoke(cli, ["token", "--hostname", ENDPOINT, "get"])
+
+    assert 0 == result.exit_code
+    assert "username=renku\n" in result.output
+    assert "password=\n" in result.output
+
+
+def test_token_invalid_command(runner, client_with_remote, mock_login):
+    """Test call credential helper with a command other than 'get'."""
+    assert 0 == runner.invoke(cli, ["login", ENDPOINT], input=USER_CODE).exit_code
+
+    result = runner.invoke(cli, ["token", "--hostname", ENDPOINT, "non-get-command"])
+
+    assert 0 == result.exit_code
+    assert "" == result.output

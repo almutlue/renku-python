@@ -43,7 +43,7 @@ the command-line or set it once in project's configuration:
 
 This command also allows you to log into gitlab server for private repositories.
 You can use this method instead of creating an SSH key. Passing ``--git`` will
-change repository's remote URL to an endpoint in the deployment that adds
+change the repository's remote URL to an endpoint in the deployment that adds
 authentication to gitlab requests.
 
 .. note::
@@ -65,7 +65,7 @@ endpoints are removed.
 import click
 
 from renku.cli.utils.callback import ClickCallback
-from renku.core.commands.login import login_command, logout_command
+from renku.core.commands.login import login_command, logout_command, token_command
 
 
 @click.command()
@@ -86,3 +86,12 @@ def logout(endpoint):
     communicator = ClickCallback()
     logout_command().with_communicator(communicator).build().execute(endpoint=endpoint)
     click.secho("Successfully logged out.", fg="green")
+
+
+@click.command(hidden=True)
+@click.option("--hostname", default=None, hidden=True, help="Remote hostname.")
+@click.argument("command")
+def token(command, hostname):
+    """A git credential helper for returning renku token."""
+    communicator = ClickCallback()
+    token_command().with_communicator(communicator).build().execute(command=command, hostname=hostname)
